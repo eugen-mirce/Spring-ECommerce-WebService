@@ -9,7 +9,6 @@ import com.project.app.ui.model.response.UserRest;
 import com.project.app.ws.exceptions.UserServiceException;
 import com.project.app.ws.service.UserService;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,8 @@ public class UserController {
         UserRest returnValue = new UserRest();
 
         UserDto userDto = userService.getUserByUserId(id);
-        BeanUtils.copyProperties(userDto,returnValue);
+        ModelMapper modelMapper = new ModelMapper();
+        returnValue = modelMapper.map(userDto,UserRest.class);
 
         return returnValue;
     }
@@ -44,18 +44,11 @@ public class UserController {
 
         if(userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
-        /*      Changed To ModelMapper
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userDetails, userDto);
-        */
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetails,UserDto.class);
 
         UserDto createdUser = userService.createUser(userDto);
 
-        /* Changed to ModelMapper
-        BeanUtils.copyProperties(createdUser, returnValue);
-        */
         returnValue = modelMapper.map(createdUser,UserRest.class);
 
         return returnValue;
@@ -66,13 +59,12 @@ public class UserController {
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
             )
     public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails) {
-        UserRest returnValue = new UserRest();
+        ModelMapper modelMapper = new ModelMapper();
 
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userDetails, userDto);
+        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
 
         UserDto createdUser = userService.updateUser(id,userDto);
-        BeanUtils.copyProperties(createdUser, returnValue);
+        UserRest returnValue = modelMapper.map(createdUser, UserRest.class);
 
         return returnValue;
     }
@@ -93,9 +85,9 @@ public class UserController {
     public List<UserRest> getUsers(@RequestParam(value="page", defaultValue = "1") int page, @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<UserRest> returnValue = new ArrayList<>();
         List<UserDto> users = userService.getUsers(page,limit);
+        ModelMapper modelMapper = new ModelMapper();
         for(UserDto userDto : users) {
-            UserRest userModel = new UserRest();
-            BeanUtils.copyProperties(userDto,userModel);
+            UserRest userModel = modelMapper.map(userDto,UserRest.class);
             returnValue.add(userModel);
         }
         return returnValue;
