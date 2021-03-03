@@ -1,18 +1,19 @@
 package com.project.app.controller;
 
+import com.project.app.shared.dto.AddressDTO;
 import com.project.app.shared.dto.UserDto;
 import com.project.app.ui.model.request.UserDetailsRequestModel;
-import com.project.app.ui.model.response.ErrorMessages;
-import com.project.app.ui.model.response.OperationStatusModel;
-import com.project.app.ui.model.response.RequestOperationStatus;
-import com.project.app.ui.model.response.UserRest;
+import com.project.app.ui.model.response.*;
 import com.project.app.ws.exceptions.UserServiceException;
+import com.project.app.ws.service.AddressService;
 import com.project.app.ws.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,25 +23,25 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    AddressService addressService;
+
     @GetMapping(
-            path="/{id}",
+            path="/{userId}",
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
             )
-    public UserRest getUser(@PathVariable String id) {
-        UserRest returnValue = new UserRest();
+    public UserRest getUser(@PathVariable String userId) {
 
-        UserDto userDto = userService.getUserByUserId(id);
+        UserDto userDto = userService.getUserByUserId(userId);
         ModelMapper modelMapper = new ModelMapper();
-        returnValue = modelMapper.map(userDto,UserRest.class);
 
-        return returnValue;
+        return modelMapper.map(userDto,UserRest.class);
     }
     @PostMapping(
             consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
             )
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws UserServiceException {
-        UserRest returnValue = new UserRest();
 
         if(userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
@@ -49,33 +50,30 @@ public class UserController {
 
         UserDto createdUser = userService.createUser(userDto);
 
-        returnValue = modelMapper.map(createdUser,UserRest.class);
+        return modelMapper.map(createdUser,UserRest.class);
 
-        return returnValue;
     }
     @PutMapping(
-            path = "/{id}",
+            path = "/{userId}",
             consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
             )
-    public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails) {
+    public UserRest updateUser(@PathVariable String userId, @RequestBody UserDetailsRequestModel userDetails) {
         ModelMapper modelMapper = new ModelMapper();
 
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
 
-        UserDto createdUser = userService.updateUser(id,userDto);
-        UserRest returnValue = modelMapper.map(createdUser, UserRest.class);
-
-        return returnValue;
+        UserDto createdUser = userService.updateUser(userId,userDto);
+        return modelMapper.map(createdUser, UserRest.class);
     }
     @DeleteMapping(
-            path = "/{id}",
+            path = "/{userId}",
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
             )
-    public OperationStatusModel deleteUser(@PathVariable String id) {
+    public OperationStatusModel deleteUser(@PathVariable String userId) {
         OperationStatusModel returnValue = new OperationStatusModel();
         returnValue.setOperationName(RequestOperationName.DELETE.name());
-        userService.deleteUser(id);
+        userService.deleteUser(userId);
         returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
 
         return returnValue;
@@ -91,5 +89,32 @@ public class UserController {
             returnValue.add(userModel);
         }
         return returnValue;
+    }
+
+    //http://localhost:8080/users/{id}/addresses
+    @GetMapping(
+            path = "/{userId}/addresses",
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
+    )
+    public List<AddressesRest> getUserAddresses(@PathVariable String userId) {
+        List<AddressesRest> returnValue = new ArrayList<>();
+        List<AddressDTO> addressDTO = addressService.getAddresses(userId);
+
+        if(addressDTO != null && !addressDTO.isEmpty()) {
+            Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
+            returnValue = new ModelMapper().map(addressDTO,listType);
+        }
+        return returnValue;
+    }
+
+    //http://localhost:8080/users/{id}/addresses/{aid}
+    @GetMapping(
+            path = "/{userId}/addresses/{addressId}",
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
+    )
+    public AddressesRest getUserAddress(@PathVariable String addressId) {
+        AddressDTO addressDTO = addressService.getAddress(addressId);
+
+        return new ModelMapper().map(addressDTO,AddressesRest.class);
     }
 }
