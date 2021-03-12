@@ -11,6 +11,7 @@ import com.project.app.ws.io.repositories.UserRepository;
 import com.project.app.ws.io.entity.UserEntity;
 import com.project.app.ws.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,13 +51,13 @@ public class UserServiceImpl implements UserService {
     final String FROM = "genimirce92@gmail.com";
     final String SUBJECT = "One Last Step To Complete Registration";
     final String PASSWORD_RESET_SUBJECT = "Password Reset Request";
-    final String HTMLBODY =
+    final String HTML_BODY =
             "<h1>Please verify your email address</h1>"
         +   "<p>Thank you for registering with our app. To complete the registration process click on the following link: "
         +   "<a href='http://localhost:8080/verification-service/email-verification.html?token=$tokenValue'>"
         +   "Final Step To Complete Registration</a><br/><br/>"
         +   "Thank you and we are waiting for you!";
-    final String PASSWORD_RESET_HTMLBODY =
+    final String PASSWORD_RESET_HTML_BODY =
             "<h1>A request to reset your password</h1>"
         +   "<p>Hi $firstName!</p>"
         +   "<p>Someone has requested to reset your password in our application. If it were not you, than ignore this email. "
@@ -97,22 +98,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(String email) {
+        UserDto returnValue = new UserDto();
         UserEntity userEntity = userRepository.findByEmail(email);
         if(userEntity == null) throw new UsernameNotFoundException(email);
 
-        ModelMapper modelMapper = new ModelMapper();
-        UserDto returnValue = modelMapper.map(userEntity,UserDto.class);
+        BeanUtils.copyProperties(userEntity,returnValue);
         return returnValue;
     }
 
     @Override
     public UserDto getUserByUserId(String userId) {
-        UserDto returnValue = new UserDto();
         UserEntity userEntity = userRepository.findByUserId(userId);
         if(userEntity == null) throw new UserServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
         ModelMapper modelMapper = new ModelMapper();
-        returnValue = modelMapper.map(userEntity,UserDto.class);
-        return returnValue;
+        return modelMapper.map(userEntity,UserDto.class);
     }
 
     @Override
@@ -126,9 +125,8 @@ public class UserServiceImpl implements UserService {
         userEntity.setLastName(user.getLastName());
 
         UserEntity updatedUserDetails = userRepository.save(userEntity);
-        UserDto returnValue = modelMapper.map(updatedUserDetails,UserDto.class);
+        return modelMapper.map(updatedUserDetails,UserDto.class);
 
-        return returnValue;
     }
 
     @Override
@@ -181,8 +179,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean requestPasswordReset(String email) {
 
-        boolean returnValue = false;
-
         UserEntity userEntity = userRepository.findByEmail(email);
 
         if(userEntity == null) {
@@ -213,12 +209,12 @@ public class UserServiceImpl implements UserService {
 
         // Check if token has expired
         if(Utils.hasTokenExpired(token)) {
-            return returnValue;
+            return false;
         }
 
         PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenRepository.findByToken(token);
         if(passwordResetTokenEntity == null) {
-            return returnValue;
+            return false;
         }
 
         // Create the new encrypted password
@@ -230,7 +226,7 @@ public class UserServiceImpl implements UserService {
         UserEntity savedUserEntity = userRepository.save(userEntity);
 
         // Check if password was changed successfully
-        if(savedUserEntity != null && savedUserEntity.getEncryptedPassword().equalsIgnoreCase(encodedPassword)) {
+        if(savedUserEntity.getEncryptedPassword().equalsIgnoreCase(encodedPassword)) {
             returnValue = true;
         }
 
@@ -257,7 +253,7 @@ public class UserServiceImpl implements UserService {
     }
     public void verifyEmail(UserDto userDto) throws UnsupportedEncodingException, MessagingException {
 
-        String htmlBodyWithToken = HTMLBODY.replace("$tokenValue",userDto.getEmailVerificationToken());
+        String htmlBodyWithToken = HTML_BODY.replace("$tokenValue",userDto.getEmailVerificationToken());
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -272,7 +268,7 @@ public class UserServiceImpl implements UserService {
     private boolean sendPasswordResetRequest(String firstName, String email, String token)
             throws UnsupportedEncodingException, MessagingException {
 
-        String  htmlBody = PASSWORD_RESET_HTMLBODY.replace("$firstName",firstName);
+        String  htmlBody = PASSWORD_RESET_HTML_BODY.replace("$firstName",firstName);
                 htmlBody = htmlBody.replace("$tokenValue",token);
 
         MimeMessage message = javaMailSender.createMimeMessage();
