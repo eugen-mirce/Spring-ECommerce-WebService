@@ -1,15 +1,14 @@
-package com.project.app.controller;
+package com.project.app.ws.ui.controller;
 
-import com.project.app.shared.dto.AddressDTO;
-import com.project.app.shared.dto.UserDto;
-import com.project.app.ui.model.request.PasswordResetModel;
-import com.project.app.ui.model.request.PasswordResetRequestModel;
-import com.project.app.ui.model.request.UserDetailsRequestModel;
-import com.project.app.ui.model.response.*;
+import com.project.app.ws.shared.dto.AddressDTO;
+import com.project.app.ws.shared.dto.UserDto;
+import com.project.app.ws.ui.model.request.PasswordResetModel;
+import com.project.app.ws.ui.model.request.PasswordResetRequestModel;
+import com.project.app.ws.ui.model.request.UserDetailsRequestModel;
+import com.project.app.ws.ui.model.response.*;
 import com.project.app.ws.exceptions.UserServiceException;
 import com.project.app.ws.service.AddressService;
 import com.project.app.ws.service.UserService;
-import org.apache.tomcat.jni.Address;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;

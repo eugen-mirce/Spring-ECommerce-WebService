@@ -1,4 +1,4 @@
-package com.project.app.shared.dto;
+package com.project.app.ws.shared.dto;
 
 public class AddressDTO {
     private long id;

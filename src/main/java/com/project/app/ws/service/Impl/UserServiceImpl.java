@@ -1,9 +1,10 @@
 package com.project.app.ws.service.Impl;
 
-import com.project.app.shared.Utils;
-import com.project.app.shared.dto.AddressDTO;
-import com.project.app.shared.dto.UserDto;
-import com.project.app.ui.model.response.ErrorMessages;
+import com.project.app.ws.shared.EmailSender;
+import com.project.app.ws.shared.Utils;
+import com.project.app.ws.shared.dto.AddressDTO;
+import com.project.app.ws.shared.dto.UserDto;
+import com.project.app.ws.ui.model.response.ErrorMessages;
 import com.project.app.ws.exceptions.UserServiceException;
 import com.project.app.ws.io.entity.PasswordResetTokenEntity;
 import com.project.app.ws.io.repositories.PasswordResetTokenRepository;
@@ -15,17 +16,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,35 +36,17 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     PasswordResetTokenRepository passwordResetTokenRepository;
+
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    JavaMailSender javaMailSender;
-
-
-    /* EMAIL TEMPLATE */
-    final String FROM = "genimirce92@gmail.com";
-    final String SUBJECT = "One Last Step To Complete Registration";
-    final String PASSWORD_RESET_SUBJECT = "Password Reset Request";
-    final String HTML_BODY =
-            "<h1>Please verify your email address</h1>"
-        +   "<p>Thank you for registering with our app. To complete the registration process click on the following link: "
-        +   "<a href='http://localhost:8080/verification-service/email-verification.html?token=$tokenValue'>"
-        +   "Final Step To Complete Registration</a><br/><br/>"
-        +   "Thank you and we are waiting for you!";
-    final String PASSWORD_RESET_HTML_BODY =
-            "<h1>A request to reset your password</h1>"
-        +   "<p>Hi $firstName!</p>"
-        +   "<p>Someone has requested to reset your password in our application. If it were not you, than ignore this email. "
-        +   "Otherwise please click on the following link to reset your password: "
-        +   "<a href='http://localhost:8080/verification-service/password-reset.html?token=$tokenValue'>"
-        +   "Click here to reset your password</a><br/><br/>"
-        +   "Thank you!";
+    EmailSender emailSender;
     @Override
     public UserDto createUser(UserDto user) {
 
-        if(userRepository.findByEmail(user.getEmail()) != null) throw new RuntimeException("Record already exists");
+        if(userRepository.findByEmail(user.getEmail()) != null)
+            throw new UserServiceException("Record already exists");
 
         for(int i=0; i < user.getAddresses().size(); i++) {
             AddressDTO address = user.getAddresses().get(i);
@@ -89,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
         UserDto returnValue = modelMapper.map(storedUserDetails,UserDto.class);
         try{
-            verifyEmail(returnValue);
+            emailSender.verifyEmail(returnValue);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -193,7 +171,7 @@ public class UserServiceImpl implements UserService {
         passwordResetTokenRepository.save(passwordResetEntity);
 
         try {
-            return sendPasswordResetRequest(
+            return emailSender.sendPasswordResetRequest(
                     userEntity.getFirstName(),
                     userEntity.getEmail(),
                     token
@@ -250,36 +228,5 @@ public class UserServiceImpl implements UserService {
                 true,
                 new ArrayList<>()
                 );
-    }
-    public void verifyEmail(UserDto userDto) throws UnsupportedEncodingException, MessagingException {
-
-        String htmlBodyWithToken = HTML_BODY.replace("$tokenValue",userDto.getEmailVerificationToken());
-
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
-
-        helper.setFrom(FROM,"AppName");
-        helper.setTo(userDto.getEmail());
-        helper.setSubject(SUBJECT);
-        helper.setText(htmlBodyWithToken, true);
-
-        javaMailSender.send(message);
-    }
-    private boolean sendPasswordResetRequest(String firstName, String email, String token)
-            throws UnsupportedEncodingException, MessagingException {
-
-        String  htmlBody = PASSWORD_RESET_HTML_BODY.replace("$firstName",firstName);
-                htmlBody = htmlBody.replace("$tokenValue",token);
-
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
-
-        helper.setFrom(FROM,"AppName");
-        helper.setTo(email);
-        helper.setSubject(PASSWORD_RESET_SUBJECT);
-        helper.setText(htmlBody, true);
-
-        javaMailSender.send(message);
-        return true;
     }
 }

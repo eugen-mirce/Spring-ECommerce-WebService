@@ -1,4 +1,4 @@
-package com.project.app.ui.model.request;
+package com.project.app.ws.ui.model.request;
 
 public class UserLoginRequestModel {
     private String email;

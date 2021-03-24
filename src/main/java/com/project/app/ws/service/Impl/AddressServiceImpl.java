@@ -1,6 +1,6 @@
 package com.project.app.ws.service.Impl;
 
-import com.project.app.shared.dto.AddressDTO;
+import com.project.app.ws.shared.dto.AddressDTO;
 import com.project.app.ws.io.entity.AddressEntity;
 import com.project.app.ws.io.entity.UserEntity;
 import com.project.app.ws.io.repositories.AddressRepository;

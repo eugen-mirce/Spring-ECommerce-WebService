@@ -1,6 +1,6 @@
 package com.project.app.ws.service;
 
-import com.project.app.shared.dto.AddressDTO;
+import com.project.app.ws.shared.dto.AddressDTO;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.project.app;
+package com.project.app.ws;
 
 import com.project.app.ws.security.AppProperties;
 import org.springframework.boot.SpringApplication;

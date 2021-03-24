@@ -1,6 +1,6 @@
 package com.project.app.ws.security;
 
-import com.project.app.SpringApplicationContext;
+import com.project.app.ws.SpringApplicationContext;
 
 public class SecurityConstants {
     public static final long EXPIRATION_TIME = 846000000;    // 10 Days

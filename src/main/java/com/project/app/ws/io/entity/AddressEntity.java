@@ -1,7 +1,5 @@
 package com.project.app.ws.io.entity;
 
-import com.project.app.shared.dto.UserDto;
-
 import javax.persistence.*;
 import java.io.Serializable;
 

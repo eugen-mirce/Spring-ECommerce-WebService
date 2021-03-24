@@ -1,11 +1,22 @@
-package com.project.app.ui.model.request;
+package com.project.app.ws.ui.model.response;
 
-public class AddressRequestModel {
+import org.springframework.hateoas.RepresentationModel;
+
+public class AddressesRest extends RepresentationModel<AddressesRest> {
+    private String addressId;
     private String city;
     private String country;
     private String streetName;
     private String postalCode;
     private String type;
+
+    public String getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(String addressId) {
+        this.addressId = addressId;
+    }
 
     public String getCity() {
         return city;

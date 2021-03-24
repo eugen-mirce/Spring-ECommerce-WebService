@@ -1,4 +1,4 @@
-package com.project.app.ui.model.response;
+package com.project.app.ws.ui.model.response;
 
 public class OperationStatusModel {
     private String operationResult;
