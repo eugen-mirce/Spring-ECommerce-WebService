@@ -34,6 +34,9 @@ public class UserController {
     @Autowired
     AddressService addressService;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     @GetMapping(
             path = "/{userId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
@@ -41,7 +44,6 @@ public class UserController {
     public UserRest getUser(@PathVariable String userId) {
 
         UserDto userDto = userService.getUserByUserId(userId);
-        ModelMapper modelMapper = new ModelMapper();
 
         return modelMapper.map(userDto,UserRest.class);
     }
@@ -53,7 +55,6 @@ public class UserController {
 
         if(userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
-        ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetails,UserDto.class);
 
         UserDto createdUser = userService.createUser(userDto);
@@ -67,7 +68,6 @@ public class UserController {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
             )
     public UserRest updateUser(@PathVariable String userId, @RequestBody UserDetailsRequestModel userDetails) {
-        ModelMapper modelMapper = new ModelMapper();
 
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
 
@@ -91,7 +91,6 @@ public class UserController {
     public List<UserRest> getUsers(@RequestParam(value="page", defaultValue = "1") int page, @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<UserRest> returnValue = new ArrayList<>();
         List<UserDto> users = userService.getUsers(page,limit);
-        ModelMapper modelMapper = new ModelMapper();
         for(UserDto userDto : users) {
             UserRest userModel = modelMapper.map(userDto,UserRest.class);
             returnValue.add(userModel);
@@ -110,7 +109,7 @@ public class UserController {
 
         if(addressDTO != null && !addressDTO.isEmpty()) {
             Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
-            addressesListRestModel = new ModelMapper().map(addressDTO,listType);
+            addressesListRestModel = modelMapper.map(addressDTO,listType);
 
             for(AddressesRest addressesRest: addressesListRestModel) {
                 Link addressLink = linkTo(methodOn(UserController.class).getUserAddress(userId,addressesRest.getAddressId())).withSelfRel();
@@ -123,7 +122,7 @@ public class UserController {
         return new CollectionModel<>(addressesListRestModel);
     }
 
-    //http://localhost:8080/users/{id}/addresses/{aid}
+    //http://localhost:8080/users/{userId}/addresses/{addressId}
     @GetMapping(
             path = "/{userId}/addresses/{addressId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, "application/hal+json" }
@@ -131,7 +130,7 @@ public class UserController {
     public EntityModel<AddressesRest> getUserAddress(@PathVariable String userId,
                                                     @PathVariable String addressId) {
         AddressDTO addressDTO = addressService.getAddress(addressId);
-        AddressesRest addressesRestModel = new ModelMapper().map(addressDTO,AddressesRest.class);
+        AddressesRest addressesRestModel = modelMapper.map(addressDTO,AddressesRest.class);
 
         Link addressLink = linkTo(methodOn(UserController.class).getUserAddress(userId,addressId)).withSelfRel();
         Link userLink = linkTo(methodOn(UserController.class).getUser(userId)).withRel("user");

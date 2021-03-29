@@ -1,41 +1,21 @@
-package com.project.app.ws.io.entity;
+package com.project.app.ws.shared.dto;
 
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
+import com.project.app.ws.io.entity.CategoryEntity;
 
-import javax.persistence.*;
 import java.io.Serializable;
 
-@Entity(name="products")
-public class ProductEntity implements Serializable {
-    private static final long serialVersionID = 1L;
+public class ProductDTO implements Serializable {
+    private static final long serialVersionId = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Column(nullable = false, length = 30)
     private String productId;
-
-    @Column(nullable = false, length = 100)
     private String name;
-
-    @Column(nullable = false, length = 1000)
     private String description;
-
-    @Column(nullable = false)
-    private Double price;
-
-    @Column(nullable = true, length = 200)
     private String pictureUrl;
-
-    @Column(nullable = false)
+    private Double price;
     private boolean available;
-
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-//    @NotFound(action = NotFoundAction.IGNORE)
-    @JoinColumn(name="category_id", referencedColumnName="id", unique = false)
     private CategoryEntity categoryEntity;
+    private Long categoryId;
 
     public long getId() {
         return id;
@@ -61,6 +41,12 @@ public class ProductEntity implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
+    public String getPictureUrl() {
+        return pictureUrl;
+    }
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
+    }
     public Double getPrice() {
         return price;
     }
@@ -79,11 +65,10 @@ public class ProductEntity implements Serializable {
     public void setCategoryEntity(CategoryEntity categoryEntity) {
         this.categoryEntity = categoryEntity;
     }
-    public String getPictureUrl() {
-        return pictureUrl;
+    public Long getCategoryId() {
+        return categoryId;
     }
-    public void setPictureUrl(String pictureUrl) {
-        this.pictureUrl = pictureUrl;
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
-
 }

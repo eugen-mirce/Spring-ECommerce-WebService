@@ -35,6 +35,9 @@ public class UserServiceImpl implements UserService {
     Utils utils;
 
     @Autowired
+    ModelMapper modelMapper;
+
+    @Autowired
     PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
@@ -55,7 +58,6 @@ public class UserServiceImpl implements UserService {
             user.getAddresses().set(i,address);
         }
 
-        ModelMapper modelMapper = new ModelMapper();
         UserEntity userEntity = modelMapper.map(user,UserEntity.class);
 
         String publicUserId = utils.generateUserId(30);
@@ -88,13 +90,11 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserByUserId(String userId) {
         UserEntity userEntity = userRepository.findByUserId(userId);
         if(userEntity == null) throw new UserServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
-        ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(userEntity,UserDto.class);
     }
 
     @Override
     public UserDto updateUser(String userId,UserDto user) {
-        ModelMapper modelMapper = new ModelMapper();
 
         UserEntity userEntity = userRepository.findByUserId(userId);
         if(userEntity == null) throw new UserServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
@@ -120,15 +120,12 @@ public class UserServiceImpl implements UserService {
 
         if(page > 0) page++;
 
-        ModelMapper modelMapper = new ModelMapper();
-
         List<UserDto> returnValue = new ArrayList<>();
         PageRequest pageableRequest = PageRequest.of(page,limit);
         Page<UserEntity> usersPage = userRepository.findAll(pageableRequest);
         List<UserEntity> users = usersPage.getContent();
         for(UserEntity userEntity: users) {
             UserDto userDto = modelMapper.map(userEntity,UserDto.class);
-
             returnValue.add(userDto);
         }
         return returnValue;

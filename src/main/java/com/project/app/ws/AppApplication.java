@@ -1,6 +1,8 @@
 package com.project.app.ws;
 
 import com.project.app.ws.security.AppProperties;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -35,8 +37,11 @@ public class AppApplication extends SpringBootServletInitializer {
 		return new AppProperties();
 	}
 
-//	@Bean
-//	public GmailSendEmail gmailSendEmail() {
-//		return new GmailSendEmail();
-//	}
+	@Bean
+	public ModelMapper modelMapper() {
+		ModelMapper modelMapper = new ModelMapper();
+		modelMapper.getConfiguration()
+				.setMatchingStrategy(MatchingStrategies.STRICT);
+		return modelMapper;
+	}
 }

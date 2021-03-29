@@ -6,7 +6,7 @@ import java.io.Serializable;
 @Entity(name="password_reset_token")
 public class PasswordResetTokenEntity implements Serializable {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private String token;

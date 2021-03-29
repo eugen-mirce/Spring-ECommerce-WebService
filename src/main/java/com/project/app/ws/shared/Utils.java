@@ -21,6 +21,12 @@ public class Utils {
     public String generateAddressId(int length) {
         return generateRandomString(length);
     }
+    public String generateOrderId(int length) {
+        return generateRandomString(length);
+    }
+    public String generateProductId(int length) {
+        return generateRandomString(length);
+    }
     private String generateRandomString(int length) {
         StringBuilder returnValue = new StringBuilder(length);
 

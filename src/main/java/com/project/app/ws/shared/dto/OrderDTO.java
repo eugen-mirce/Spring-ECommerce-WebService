@@ -1,38 +1,22 @@
-package com.project.app.ws.io.entity;
+package com.project.app.ws.shared.dto;
 
-import javax.persistence.*;
+import com.project.app.ws.io.entity.CategoryEntity;
+
 import java.io.Serializable;
 import java.util.Date;
 
-@Entity(name="orders")
-public class OrderEntity implements Serializable {
-    private static final long serialVersionID = 1L;
+public class OrderDTO implements Serializable {
+    private static final long serialVersionId = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Column(nullable = false, length = 30)
     private String orderId;
-
-    @Column(nullable = false, length = 2)
+    private UserDto userDetails;
+    private String userId;
+    private ProductDTO productDetails;
+    private Long productId;
     private int quantity;
-
-    @ManyToOne
-    @JoinColumn(name="users_id")
-    private UserEntity userDetails;
-
-    @ManyToOne
-    @JoinColumn(name="products_id")
-    private ProductEntity productDetails;
-
-    @Column(nullable = false)
     private Date date;
-
-    @Column(nullable = true)
     private boolean shipped;
-
-    @Column(nullable = false)
     private boolean completed;
 
     public long getId() {
@@ -47,23 +31,35 @@ public class OrderEntity implements Serializable {
     public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
+    public UserDto getUserDetails() {
+        return userDetails;
+    }
+    public void setUserDetails(UserDto userDetails) {
+        this.userDetails = userDetails;
+    }
+    public String getUserId() {
+        return userId;
+    }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+    public ProductDTO getProductDetails() {
+        return productDetails;
+    }
+    public void setProductDetails(ProductDTO productDetails) {
+        this.productDetails = productDetails;
+    }
+    public Long getProductId() {
+        return productId;
+    }
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
     public int getQuantity() {
         return quantity;
     }
     public void setQuantity(int quantity) {
         this.quantity = quantity;
-    }
-    public UserEntity getUserDetails() {
-        return userDetails;
-    }
-    public void setUserDetails(UserEntity userDetails) {
-        this.userDetails = userDetails;
-    }
-    public ProductEntity getProductDetails() {
-        return productDetails;
-    }
-    public void setProductDetails(ProductEntity productDetails) {
-        this.productDetails = productDetails;
     }
     public Date getDate() {
         return date;

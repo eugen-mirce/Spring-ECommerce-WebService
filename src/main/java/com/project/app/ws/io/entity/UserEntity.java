@@ -9,7 +9,7 @@ public class UserEntity implements Serializable {
     private static final long serialVersionID = 1L;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(nullable = false)
