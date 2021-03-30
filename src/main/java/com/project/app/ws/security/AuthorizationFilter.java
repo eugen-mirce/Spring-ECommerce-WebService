@@ -1,6 +1,9 @@
 package com.project.app.ws.security;
 
+import com.project.app.ws.io.entity.UserEntity;
+import com.project.app.ws.io.repositories.UserRepository;
 import io.jsonwebtoken.Jwts;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,8 +19,12 @@ import java.rmi.ServerException;
 import java.util.ArrayList;
 
 public class AuthorizationFilter extends BasicAuthenticationFilter {
-    public AuthorizationFilter(AuthenticationManager authenticationManager) {
+    @Autowired
+    private final UserRepository userRepository;
+
+    public AuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
         super(authenticationManager);
+        this.userRepository = userRepository;
     }
     @Override
     public void doFilterInternal(HttpServletRequest req,
@@ -45,7 +52,11 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
                     .getBody()
                     .getSubject();
             if(user != null) {
-                return new UsernamePasswordAuthenticationToken(user,null, new ArrayList<>());
+                UserEntity userEntity = userRepository.findByEmail(user);
+                if(userEntity == null) return null;
+
+                UserPrincipal userPrincipal = new UserPrincipal(userEntity);
+                return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
             }
             return null;
         }

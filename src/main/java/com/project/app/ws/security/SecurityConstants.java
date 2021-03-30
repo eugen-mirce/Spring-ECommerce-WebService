@@ -14,6 +14,7 @@ public class SecurityConstants {
     public static final String PRODUCT_URL = "/product";
     public static final String CATEGORY_URL = "/category";
     public static final String ORDER_URL = "/order";
+    public static final String CART_URL = "/order/cart";
 
     public static String getSecurityToken() {
         AppProperties appProperties = (AppProperties) SpringApplicationContext.getBean("AppProperties");

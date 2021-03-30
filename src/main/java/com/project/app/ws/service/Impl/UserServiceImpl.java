@@ -1,5 +1,8 @@
 package com.project.app.ws.service.Impl;
 
+import com.project.app.ws.io.entity.RoleEntity;
+import com.project.app.ws.io.repositories.RoleRepository;
+import com.project.app.ws.security.UserPrincipal;
 import com.project.app.ws.shared.EmailSender;
 import com.project.app.ws.shared.Utils;
 import com.project.app.ws.shared.dto.AddressDTO;
@@ -22,8 +25,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -45,6 +47,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     EmailSender emailSender;
+
+    @Autowired
+    RoleRepository roleRepository;
+
     @Override
     public UserDto createUser(UserDto user) {
 
@@ -65,6 +71,9 @@ public class UserServiceImpl implements UserService {
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(publicUserId));
         userEntity.setEmailVerificationStatus(false);
+
+        userEntity.setRoles(Arrays.asList(roleRepository.findByName("ROLE_USER")));
+
         UserEntity storedUserDetails = userRepository.save(userEntity);
 
         UserDto returnValue = modelMapper.map(storedUserDetails,UserDto.class);
@@ -216,14 +225,15 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(email);
         if(userEntity == null) throw new UsernameNotFoundException(email);
 
-        return new User(
-                userEntity.getEmail(),
-                userEntity.getEncryptedPassword(),
-                userEntity.getEmailVerificationStatus(),
-                true,
-                true,
-                true,
-                new ArrayList<>()
-                );
+        return new UserPrincipal(userEntity);
+//        return new User(
+//                userEntity.getEmail(),
+//                userEntity.getEncryptedPassword(),
+//                userEntity.getEmailVerificationStatus(),
+//                true,
+//                true,
+//                true,
+//                new ArrayList<>()
+//                );
     }
 }

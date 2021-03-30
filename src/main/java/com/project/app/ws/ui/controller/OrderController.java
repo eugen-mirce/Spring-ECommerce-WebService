@@ -1,14 +1,19 @@
 package com.project.app.ws.ui.controller;
 
 import com.project.app.ws.service.OrderService;
+import com.project.app.ws.shared.dto.AddressDTO;
 import com.project.app.ws.shared.dto.OrderDTO;
 import com.project.app.ws.ui.model.request.OrderRequestModel;
+import com.project.app.ws.ui.model.request.OrdersRequestModel;
+import com.project.app.ws.ui.model.response.AddressesRest;
 import com.project.app.ws.ui.model.response.OrderRest;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,5 +67,26 @@ public class OrderController {
         OrderDTO savedOrder = orderService.createOrder(orderDTO);
 
         return modelMapper.map(savedOrder,OrderRest.class);
+    }
+    @PostMapping(
+            path = { "/cart", "/cart/"},
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public List<OrderRest> createOrders(@RequestBody OrdersRequestModel ordersRequestModel) {
+        List<OrderRest> ordersRestList = new ArrayList<>();
+
+        String userId = ordersRequestModel.getUserId();
+
+        Type listType = new TypeToken<List<OrderDTO>>() {}.getType();
+        List<OrderDTO> orderDTOList = modelMapper.map(ordersRequestModel.getOrders(),listType);
+
+        for(OrderDTO orderDTO: orderDTOList) {
+            orderDTO.setUserId(userId);
+            OrderRest orderRest = modelMapper.map(orderService.createOrder(orderDTO),OrderRest.class);
+            ordersRestList.add(orderRest);
+        }
+
+        return ordersRestList;
     }
 }
