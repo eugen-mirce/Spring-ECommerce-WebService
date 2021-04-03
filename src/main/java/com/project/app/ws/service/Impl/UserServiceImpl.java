@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
     RoleRepository roleRepository;
 
     @Override
-    public UserDto createUser(UserDto user) {
+    public UserDto createUser(UserDto user, boolean skipVerification) {
 
         if(userRepository.findByEmail(user.getEmail()) != null)
             throw new UserServiceException("Record already exists");
@@ -69,18 +69,25 @@ public class UserServiceImpl implements UserService {
         String publicUserId = utils.generateUserId(30);
         userEntity.setUserId(publicUserId);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(publicUserId));
-        userEntity.setEmailVerificationStatus(false);
-
+        if (skipVerification) {
+            userEntity.setEmailVerificationToken(null);
+            userEntity.setEmailVerificationStatus(true);
+        } else {
+            userEntity.setEmailVerificationToken(utils.generateEmailVerificationToken(publicUserId));
+            userEntity.setEmailVerificationStatus(false);
+        }
         userEntity.setRoles(Arrays.asList(roleRepository.findByName("ROLE_USER")));
 
         UserEntity storedUserDetails = userRepository.save(userEntity);
 
         UserDto returnValue = modelMapper.map(storedUserDetails,UserDto.class);
-        try{
-            emailSender.verifyEmail(returnValue);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+
+        if(!skipVerification) {
+            try {
+                emailSender.verifyEmail(returnValue);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         }
         return returnValue;
     }

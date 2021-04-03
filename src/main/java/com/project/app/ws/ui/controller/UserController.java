@@ -33,6 +33,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("users")        //http://localhost:8080/users
 public class UserController {
+    private boolean skipVerification = true;
+
     @Autowired
     UserService userService;
 
@@ -69,7 +71,7 @@ public class UserController {
 
         UserDto userDto = modelMapper.map(userDetails,UserDto.class);
         userDto.setRoles(new HashSet<>(Arrays.asList(Roles.ROLE_USER.name())));
-        UserDto createdUser = userService.createUser(userDto);
+        UserDto createdUser = userService.createUser(userDto,skipVerification);
 
         return modelMapper.map(createdUser,UserRest.class);
 
