@@ -1,5 +1,6 @@
 package com.project.app.ws.service.Impl;
 
+import com.project.app.ws.exceptions.CategoryServiceException;
 import com.project.app.ws.exceptions.ProductServiceException;
 import com.project.app.ws.exceptions.UserServiceException;
 import com.project.app.ws.io.entity.CategoryEntity;
@@ -15,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,6 +46,13 @@ public class ProductServiceImpl implements ProductService {
         productEntity.setProductId(utils.generateProductId(30));
         productEntity.setCategoryEntity(categoryEntity);
         productEntity.setAvailable(Boolean.TRUE);
+        ProductEntity prod1 = productRepository.findById(1L).orElseThrow(() -> new ProductServiceException("Product Not Fuofdsf"));
+        ProductEntity prod2 = productRepository.findById(2L).orElseThrow(() -> new ProductServiceException("Product Not Fuofdsf"));
+        prod1.setDescription("test2");
+        List<ProductEntity> items = new ArrayList<>();
+        items.add(prod1);
+        items.add(prod2);
+        productEntity.setItems(items);
         ProductEntity savedProduct = productRepository.save(productEntity);
 
         return modelMapper.map(savedProduct,ProductDTO.class);
@@ -60,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> getProducts(int page, int limit) {
-        if(page > 0) page++;
+        if(page > 0) page--;
         List<ProductDTO> returnValue = new ArrayList<>();
 
         PageRequest pageableRequest = PageRequest.of(page,limit);
@@ -76,12 +85,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDTO> getProducts(long categoryId, int page, int limit) {
-        if(page > 0) page++;
+    public List<ProductDTO> getProductsByCategory(long categoryId, int page, int limit) {
+        if(page > 0) page--;
+
+        CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(() -> new CategoryServiceException("Category Not Found Exception."));
 
         List<ProductDTO> returnValue = new ArrayList<>();
-        PageRequest pageableRequest = PageRequest.of(page,limit);
-        Page<ProductEntity> productsPage = productRepository.findAllByCategoryEntity(categoryId,pageableRequest);
+        Pageable pageableRequest = PageRequest.of(page,limit);
+        Page<ProductEntity> productsPage = productRepository.findAllByCategoryEntity(categoryEntity,pageableRequest);
         List<ProductEntity> products = productsPage.getContent();
 
         for(ProductEntity productEntity : products) {

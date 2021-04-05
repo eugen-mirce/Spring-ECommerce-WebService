@@ -35,6 +35,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, SecurityConstants.ORDER_URL).permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.ORDER_URL).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityConstants.CART_URL).permitAll()
+                .antMatchers(HttpMethod.GET, SecurityConstants.PRODUCT_URL+"/category/**").permitAll()
                 .anyRequest().authenticated().and()
                 .addFilter(getAuthenticationFilter())
                 .addFilter(new AuthorizationFilter(authenticationManager(), userRepository))

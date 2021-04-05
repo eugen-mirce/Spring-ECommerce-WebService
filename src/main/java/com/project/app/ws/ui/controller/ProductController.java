@@ -50,7 +50,7 @@ public class ProductController {
             @RequestParam(value="limit", defaultValue = "20") int limit
     ) {
         List<ProductRest> returnValue = new ArrayList<>();
-        List<ProductDTO> products = productService.getProducts(categoryId,page,limit);
+        List<ProductDTO> products = productService.getProductsByCategory(categoryId,page,limit);
 
         for(ProductDTO productDTO: products) {
             ProductRest productRest = modelMapper.map(productDTO,ProductRest.class);

@@ -15,7 +15,6 @@ public class EmailSender {
     @Autowired
     JavaMailSender javaMailSender;
 
-
     /* EMAIL TEMPLATE */
     final String FROM = "genimirce92@gmail.com";
     final String SUBJECT = "One Last Step To Complete Registration";

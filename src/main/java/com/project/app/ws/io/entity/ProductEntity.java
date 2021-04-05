@@ -5,6 +5,7 @@ import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity(name="products")
 public class ProductEntity implements Serializable {
@@ -13,6 +14,17 @@ public class ProductEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @ElementCollection
+    private List<ProductEntity> items;
+
+    public List<ProductEntity> getItems() {
+        return items;
+    }
+
+    public void setItems(List<ProductEntity> items) {
+        this.items = items;
+    }
 
     @Column(nullable = false, length = 30)
     private String productId;

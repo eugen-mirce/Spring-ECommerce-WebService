@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getUsers(int page, int limit) {
 
-        if(page > 0) page++;
+        if(page > 0) page--;
 
         List<UserDto> returnValue = new ArrayList<>();
         PageRequest pageableRequest = PageRequest.of(page,limit);
