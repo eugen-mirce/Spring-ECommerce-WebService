@@ -1,5 +1,8 @@
 package com.project.app.ws.ui.model.response;
 
+import java.util.Collection;
+import java.util.Set;
+
 public class ProductRest {
     private long id;
     private String productId;
@@ -8,7 +11,8 @@ public class ProductRest {
     private String pictureUrl;
     private Double price;
     private boolean available;
-    private String categoryId;
+    private long categoryId;
+    private Set<ProductRest> items;
 
     public long getId() {
         return id;
@@ -52,10 +56,16 @@ public class ProductRest {
     public void setAvailable(boolean available) {
         this.available = available;
     }
-    public String getCategoryId() {
+    public long getCategoryId() {
         return categoryId;
     }
-    public void setCategoryId(String categoryId) {
+    public void setCategoryId(long categoryId) {
         this.categoryId = categoryId;
+    }
+    public Set<ProductRest> getItems() {
+        return items;
+    }
+    public void setItems(Set<ProductRest> items) {
+        this.items = items;
     }
 }

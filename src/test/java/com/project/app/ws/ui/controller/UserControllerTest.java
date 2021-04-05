@@ -50,10 +50,6 @@ public class UserControllerTest {
         userDto.setEmailVerificationStatus(Boolean.FALSE);
         userDto.setUserId(userId);
         userDto.setAddresses(getAddresses());
-
-        userRestResponse = modelMapper.map(userDto,UserRest.class);
-
-        when(modelMapper.map(any(), any())).thenReturn(userRestResponse);
     }
 
     @Test

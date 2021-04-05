@@ -3,6 +3,8 @@ package com.project.app.ws.shared.dto;
 import com.project.app.ws.io.entity.CategoryEntity;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 public class ProductDTO implements Serializable {
     private static final long serialVersionId = 1L;
@@ -15,7 +17,9 @@ public class ProductDTO implements Serializable {
     private Double price;
     private boolean available;
     private CategoryEntity categoryEntity;
-    private Long categoryId;
+    private long categoryId;
+    private Collection<ProductDTO> items;
+    private List<ItemIds> itemIds;
 
     public long getId() {
         return id;
@@ -65,10 +69,22 @@ public class ProductDTO implements Serializable {
     public void setCategoryEntity(CategoryEntity categoryEntity) {
         this.categoryEntity = categoryEntity;
     }
-    public Long getCategoryId() {
+    public long getCategoryId() {
         return categoryId;
     }
-    public void setCategoryId(Long categoryId) {
+    public void setCategoryId(long categoryId) {
         this.categoryId = categoryId;
+    }
+    public Collection<ProductDTO> getItems() {
+        return items;
+    }
+    public void setItems(Collection<ProductDTO> items) {
+        this.items = items;
+    }
+    public List<ItemIds> getItemIds() {
+        return itemIds;
+    }
+    public void setItemIds(List<ItemIds> itemIds) {
+        this.itemIds = itemIds;
     }
 }

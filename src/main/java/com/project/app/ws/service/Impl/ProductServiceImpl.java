@@ -10,6 +10,7 @@ import com.project.app.ws.io.repositories.ProductRepository;
 import com.project.app.ws.service.CategoryService;
 import com.project.app.ws.service.ProductService;
 import com.project.app.ws.shared.Utils;
+import com.project.app.ws.shared.dto.ItemIds;
 import com.project.app.ws.shared.dto.ProductDTO;
 import org.dom4j.rule.Mode;
 import org.modelmapper.ModelMapper;
@@ -19,9 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -46,13 +45,17 @@ public class ProductServiceImpl implements ProductService {
         productEntity.setProductId(utils.generateProductId(30));
         productEntity.setCategoryEntity(categoryEntity);
         productEntity.setAvailable(Boolean.TRUE);
-        ProductEntity prod1 = productRepository.findById(1L).orElseThrow(() -> new ProductServiceException("Product Not Fuofdsf"));
-        ProductEntity prod2 = productRepository.findById(2L).orElseThrow(() -> new ProductServiceException("Product Not Fuofdsf"));
-        prod1.setDescription("test2");
-        List<ProductEntity> items = new ArrayList<>();
-        items.add(prod1);
-        items.add(prod2);
-        productEntity.setItems(items);
+
+        // Is Set?
+        if(productDTO.getItemIds() != null && productDTO.getItemIds().size()>0) {
+            Set<ProductEntity> items = new HashSet<>();
+            for(ItemIds itemId: productDTO.getItemIds()) {
+                ProductEntity productItem = productRepository.findById(itemId.getId())
+                        .orElseThrow(() -> new ProductServiceException("Product Not Found Exception"));
+                items.add(productItem);
+            }
+            productEntity.setItems(items);
+        }
         ProductEntity savedProduct = productRepository.save(productEntity);
 
         return modelMapper.map(savedProduct,ProductDTO.class);
@@ -78,6 +81,7 @@ public class ProductServiceImpl implements ProductService {
 
         for(ProductEntity productEntity : products) {
             ProductDTO productDTO = modelMapper.map(productEntity,ProductDTO.class);
+            productDTO.setCategoryId(productDTO.getCategoryEntity().getId());
             returnValue.add(productDTO);
         }
 

@@ -5,7 +5,9 @@ import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity(name="products")
 public class ProductEntity implements Serializable {
@@ -14,17 +16,6 @@ public class ProductEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @ElementCollection
-    private List<ProductEntity> items;
-
-    public List<ProductEntity> getItems() {
-        return items;
-    }
-
-    public void setItems(List<ProductEntity> items) {
-        this.items = items;
-    }
 
     @Column(nullable = false, length = 30)
     private String productId;
@@ -45,9 +36,15 @@ public class ProductEntity implements Serializable {
     private boolean available;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-//    @NotFound(action = NotFoundAction.IGNORE)
     @JoinColumn(name="category_id", referencedColumnName="id", unique = false)
     private CategoryEntity categoryEntity;
+
+    @ManyToMany(cascade = {CascadeType.MERGE})
+    @JoinTable( name="set_products",
+                joinColumns = @JoinColumn(name = "sets_id", referencedColumnName = "id"),
+                inverseJoinColumns = @JoinColumn(name = "items_id", referencedColumnName = "id")
+    )
+    private Set<ProductEntity> items;
 
     public long getId() {
         return id;
@@ -97,5 +94,10 @@ public class ProductEntity implements Serializable {
     public void setPictureUrl(String pictureUrl) {
         this.pictureUrl = pictureUrl;
     }
-
+    public Set<ProductEntity> getItems() {
+        return items;
+    }
+    public void setItems(Set<ProductEntity> items) {
+        this.items = items;
+    }
 }
