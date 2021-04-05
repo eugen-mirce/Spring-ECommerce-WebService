@@ -5,6 +5,7 @@ import java.util.Date;
 public class OrderRest {
     private long id;
     private String orderId;
+    private String addressId;
     private int quantity;
     private Date date;
     private boolean shipped;
@@ -21,6 +22,12 @@ public class OrderRest {
     }
     public void setOrderId(String orderId) {
         this.orderId = orderId;
+    }
+    public String getAddressId() {
+        return addressId;
+    }
+    public void setAddressId(String addressId) {
+        this.addressId = addressId;
     }
     public int getQuantity() {
         return quantity;

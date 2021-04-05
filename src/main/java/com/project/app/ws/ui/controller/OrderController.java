@@ -77,16 +77,18 @@ public class OrderController {
         List<OrderRest> ordersRestList = new ArrayList<>();
 
         String userId = ordersRequestModel.getUserId();
+        String addressId = ordersRequestModel.getAddressId();
 
         Type listType = new TypeToken<List<OrderDTO>>() {}.getType();
         List<OrderDTO> orderDTOList = modelMapper.map(ordersRequestModel.getOrders(),listType);
 
         for(OrderDTO orderDTO: orderDTOList) {
             orderDTO.setUserId(userId);
-            OrderRest orderRest = modelMapper.map(orderService.createOrder(orderDTO),OrderRest.class);
+            orderDTO.setAddressId(addressId);
+            orderDTO = orderService.createOrder(orderDTO);
+            OrderRest orderRest = modelMapper.map(orderDTO,OrderRest.class);
             ordersRestList.add(orderRest);
         }
-
         return ordersRestList;
     }
 }

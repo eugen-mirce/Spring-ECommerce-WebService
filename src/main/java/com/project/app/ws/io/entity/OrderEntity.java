@@ -26,6 +26,10 @@ public class OrderEntity implements Serializable {
     @JoinColumn(name="products_id")
     private ProductEntity productDetails;
 
+    @ManyToOne
+    @JoinColumn(name="address_id")
+    private AddressEntity addressDetails;
+
     @Column(nullable = false)
     private Date date;
 
@@ -64,6 +68,12 @@ public class OrderEntity implements Serializable {
     }
     public void setProductDetails(ProductEntity productDetails) {
         this.productDetails = productDetails;
+    }
+    public AddressEntity getAddressDetails() {
+        return addressDetails;
+    }
+    public void setAddressDetails(AddressEntity addressDetails) {
+        this.addressDetails = addressDetails;
     }
     public Date getDate() {
         return date;

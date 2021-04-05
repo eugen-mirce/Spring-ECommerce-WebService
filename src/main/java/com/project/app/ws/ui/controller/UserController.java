@@ -1,5 +1,6 @@
 package com.project.app.ws.ui.controller;
 
+import com.project.app.ws.service.OrderService;
 import com.project.app.ws.shared.Roles;
 import com.project.app.ws.shared.dto.AddressDTO;
 import com.project.app.ws.shared.dto.UserDto;
@@ -42,15 +43,12 @@ public class UserController {
     AddressService addressService;
 
     @Autowired
+    OrderService orderService;
+
+    @Autowired
     ModelMapper modelMapper;
 
     @PostAuthorize("hasRole('ADMIN') or returnObject.userId == principal.userId")
-//    //TODO Add SWAGGER
-//    @ApiOperation(value="The Get User Details Web Service Endpoint",
-//            notes="${userController.GetUser.ApiOperation.Notes}")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name="authorization", value="${userController.authorizationHeader.description}", paramType="header")
-//    })
     @GetMapping(
             path = "/{userId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}

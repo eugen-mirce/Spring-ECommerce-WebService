@@ -14,6 +14,8 @@ public class OrderDTO implements Serializable {
     private String userId;
     private ProductDTO productDetails;
     private Long productId;
+    private AddressDTO addressDetails;
+    private String addressId;
     private int quantity;
     private Date date;
     private boolean shipped;
@@ -54,6 +56,18 @@ public class OrderDTO implements Serializable {
     }
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+    public AddressDTO getAddressDetails() {
+        return addressDetails;
+    }
+    public void setAddressDetails(AddressDTO addressDetails) {
+        this.addressDetails = addressDetails;
+    }
+    public String getAddressId() {
+        return addressId;
+    }
+    public void setAddressId(String addressId) {
+        this.addressId = addressId;
     }
     public int getQuantity() {
         return quantity;
