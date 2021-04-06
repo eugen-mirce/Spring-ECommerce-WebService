@@ -81,7 +81,6 @@ public class ProductServiceImpl implements ProductService {
 
         for(ProductEntity productEntity : products) {
             ProductDTO productDTO = modelMapper.map(productEntity,ProductDTO.class);
-            productDTO.setCategoryId(productDTO.getCategoryEntity().getId());
             returnValue.add(productDTO);
         }
 
