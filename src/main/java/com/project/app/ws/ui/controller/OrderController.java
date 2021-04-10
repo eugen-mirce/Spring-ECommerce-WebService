@@ -27,6 +27,7 @@ public class OrderController {
     @Autowired
     ModelMapper modelMapper;
 
+    /*
     @GetMapping(
             path = { "/{orderId}", "/{orderId}/"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
@@ -90,5 +91,5 @@ public class OrderController {
             ordersRestList.add(orderRest);
         }
         return ordersRestList;
-    }
+    }*/
 }

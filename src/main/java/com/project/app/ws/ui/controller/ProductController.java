@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("product")
@@ -23,8 +26,68 @@ public class ProductController {
 
     @Autowired
     ModelMapper modelMapper;
+    
+    //TODO Add To CategoryController
+    /*
+    */
 
+    /**
+     * [GET] Get Product Details
+     * [Path] http://localhost:8080/app/product/{productId}
+     * No Role Needed
+     * @param productId
+     * @return
+     */
     @GetMapping(
+            path = {"/{productId}", "/{productId}/"},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public ProductRest getProduct(@PathVariable Long productId) {
+
+        ProductDTO productDTO = productService.getProduct(productId);
+
+        return modelMapper.map(productDTO,ProductRest.class);
+    }
+
+    /**
+     * [POST] Create Product
+     * [Path] http://localhost:8080/app/product
+     * //TODO Add Admin Access Only
+     * @param productRequestModel
+     * @return
+     */
+    @PostMapping(
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public ProductRest createProduct(@RequestBody ProductRequestModel productRequestModel) {
+
+        ProductDTO productDTO = modelMapper.map(productRequestModel,ProductDTO.class);
+        ProductDTO savedProduct = productService.createProduct(productDTO);
+        return modelMapper.map(savedProduct,ProductRest.class);
+
+    }
+}
+
+@RestController
+@RequestMapping("products")
+class ProductsController {
+    @Autowired
+    ProductService productService;
+
+    @Autowired
+    ModelMapper modelMapper;
+
+    /**
+     * [GET] Get All Products
+     * [Path] http://localhost:8080/app/products
+     * No Role Needed
+     * @param page
+     * @param limit
+     * @return
+     */
+    @GetMapping(
+            path = { "", "/"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
     )
     public List<ProductRest> getProducts(
@@ -40,43 +103,29 @@ public class ProductController {
         }
         return returnValue;
     }
-    @GetMapping(
-            path = {"/category/{categoryId}","/category/{categoryId}/"},
+
+    /**
+     * [GET] Get Promoted Products
+     * [Path] http://localhost:8080/app/products
+     * No Role Needed
+     * @param page
+     * @param limit
+     * @return
+     */
+    @GetMapping(path = {"/promoted", "/promoted/"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
     )
-    public List<ProductRest> getProductsByCategory(
-            @PathVariable long categoryId,
+    public List<ProductRest> getPromotedProducts(
             @RequestParam(value="page", defaultValue = "1") int page,
             @RequestParam(value="limit", defaultValue = "20") int limit
     ) {
         List<ProductRest> returnValue = new ArrayList<>();
-        List<ProductDTO> products = productService.getProductsByCategory(categoryId,page,limit);
+        List<ProductDTO> products = productService.getPromotedProducts(page,limit);
 
         for(ProductDTO productDTO: products) {
             ProductRest productRest = modelMapper.map(productDTO,ProductRest.class);
             returnValue.add(productRest);
         }
         return returnValue;
-    }
-    @GetMapping(
-            path = {"/{productId}", "/{productId}/"},
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
-    )
-    public ProductRest getProduct(@PathVariable Long productId) {
-
-        ProductDTO productDTO = productService.getProduct(productId);
-
-        return modelMapper.map(productDTO,ProductRest.class);
-    }
-    @PostMapping(
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
-    )
-    public ProductRest createProduct(@RequestBody ProductRequestModel productRequestModel) {
-
-        ProductDTO productDTO = modelMapper.map(productRequestModel,ProductDTO.class);
-        ProductDTO savedProduct = productService.createProduct(productDTO);
-        return modelMapper.map(savedProduct,ProductRest.class);
-
     }
 }

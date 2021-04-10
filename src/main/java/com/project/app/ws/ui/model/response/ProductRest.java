@@ -5,12 +5,12 @@ import java.util.Set;
 
 public class ProductRest {
     private long id;
-    private String productId;
     private String name;
     private String description;
     private String pictureUrl;
     private Double price;
     private boolean available;
+    private boolean promoted;
     private long categoryId;
     private Set<ProductRest> items;
 
@@ -19,12 +19,6 @@ public class ProductRest {
     }
     public void setId(long id) {
         this.id = id;
-    }
-    public String getProductId() {
-        return productId;
-    }
-    public void setProductId(String productId) {
-        this.productId = productId;
     }
     public String getName() {
         return name;
@@ -55,6 +49,12 @@ public class ProductRest {
     }
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+    public boolean isPromoted() {
+        return promoted;
+    }
+    public void setPromoted(boolean promoted) {
+        this.promoted = promoted;
     }
     public long getCategoryId() {
         return categoryId;

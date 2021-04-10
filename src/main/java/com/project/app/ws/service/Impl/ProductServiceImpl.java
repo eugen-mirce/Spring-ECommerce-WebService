@@ -42,7 +42,6 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductServiceException("Category Not Found Exception"));
 
         ProductEntity productEntity = modelMapper.map(productDTO,ProductEntity.class);
-        productEntity.setProductId(utils.generateProductId(30));
         productEntity.setCategoryEntity(categoryEntity);
         productEntity.setAvailable(Boolean.TRUE);
 
@@ -104,5 +103,30 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return returnValue;
+    }
+
+    @Override
+    public List<ProductDTO> getPromotedProducts(int page, int limit) {
+        if(page > 0) page--;
+        List<ProductDTO> returnValue = new ArrayList<>();
+
+        Pageable pageableRequest = PageRequest.of(page,limit);
+        Page<ProductEntity> productsPage = productRepository.findAllByPromotedTrue(pageableRequest);
+        List<ProductEntity> products = productsPage.getContent();
+
+        for(ProductEntity productEntity : products) {
+            ProductDTO productDTO = modelMapper.map(productEntity,ProductDTO.class);
+            returnValue.add(productDTO);
+        }
+
+        return returnValue;
+    }
+
+    @Override
+    public Double getPrice(long id) {
+        ProductEntity productEntity = productRepository.findById(id)
+                .orElseThrow(()-> new ProductServiceException("Product Not Found Exception"));
+
+        return productEntity.getPrice();
     }
 }

@@ -1,12 +1,13 @@
 package com.project.app.ws.ui.controller;
 
+import com.project.app.ws.service.InvoiceService;
 import com.project.app.ws.service.OrderService;
 import com.project.app.ws.shared.Roles;
 import com.project.app.ws.shared.dto.AddressDTO;
+import com.project.app.ws.shared.dto.InvoiceDTO;
+import com.project.app.ws.shared.dto.OrderDTO;
 import com.project.app.ws.shared.dto.UserDto;
-import com.project.app.ws.ui.model.request.PasswordResetModel;
-import com.project.app.ws.ui.model.request.PasswordResetRequestModel;
-import com.project.app.ws.ui.model.request.UserDetailsRequestModel;
+import com.project.app.ws.ui.model.request.*;
 import com.project.app.ws.ui.model.response.*;
 import com.project.app.ws.exceptions.UserServiceException;
 import com.project.app.ws.service.AddressService;
@@ -34,7 +35,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("users")        //http://localhost:8080/users
 public class UserController {
-    private boolean skipVerification = true;
+    private boolean skipVerification = false;
 
     @Autowired
     UserService userService;
@@ -48,7 +49,17 @@ public class UserController {
     @Autowired
     ModelMapper modelMapper;
 
-    @PostAuthorize("hasRole('ADMIN') or returnObject.userId == principal.userId")
+    @Autowired
+    InvoiceService invoiceService;
+
+    /**
+     * [GET] Get User Details
+     * [Path] http://localhost:8080/app/users/{userId}
+     * No Role Needed
+     * @param userId
+     * @return
+     */
+    //@PostAuthorize("hasRole('ADMIN') or returnObject.userId == principal.userId")
     @GetMapping(
             path = "/{userId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
@@ -59,6 +70,15 @@ public class UserController {
 
         return modelMapper.map(userDto,UserRest.class);
     }
+
+    /**
+     * [POST] Create User
+     * [Path] http://localhost:8080/app/users
+     * No Role Needed
+     * @param userDetails
+     * @return
+     * @throws UserServiceException
+     */
     @PostMapping(
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
@@ -74,6 +94,15 @@ public class UserController {
         return modelMapper.map(createdUser,UserRest.class);
 
     }
+
+    /**
+     * [PUT] Update User Details
+     * [Path] http://localhost:8080/app/users/{userId}
+     * No Role Needed
+     * @param userId
+     * @param userDetails
+     * @return
+     */
     @PutMapping(
             path = "/{userId}",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
@@ -86,9 +115,15 @@ public class UserController {
         UserDto createdUser = userService.updateUser(userId,userDto);
         return modelMapper.map(createdUser, UserRest.class);
     }
+
+    /**
+     * [DELETE] Delete User
+     * [Path] http://localhost:8080/app/users/{userId}
+     * //Admin Access Only
+     * @param userId
+     * @return
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN') or #id == principal.userId")
-//    @PreAuthorize("hasAuthority('DELETE_AUTHORITY')")
-//    @Secured("ROLE_ADMIN")
     @DeleteMapping(
             path = "/{userId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
@@ -102,6 +137,14 @@ public class UserController {
         return returnValue;
     }
 
+    /**
+     * [GET] Get All Users
+     * [Path] http://localhost:8080/app/users
+     * //TODO Add Admin Access Only
+     * @param page
+     * @param limit
+     * @return
+     */
     @GetMapping(produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
     public List<UserRest> getUsers(@RequestParam(value="page", defaultValue = "1") int page, @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<UserRest> returnValue = new ArrayList<>();
@@ -113,7 +156,13 @@ public class UserController {
         return returnValue;
     }
 
-    //http://localhost:8080/users/{id}/addresses
+    /**
+     * [GET] Get Users Addresses
+     * [Path] http://localhost:8080/app/users/{userId}/addresses
+     * No Role Needed
+     * @param userId
+     * @return
+     */
     @GetMapping(
             path = "/{userId}/addresses",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, "application/hal+json" }
@@ -137,7 +186,13 @@ public class UserController {
         return new CollectionModel<>(addressesListRestModel);
     }
 
-    //http://localhost:8080/users/{userId}/addresses/{addressId}
+    /**
+     * [GET] Get User Specific Address
+     * [Path] http://localhost:8080/app/users/{userId}/addresses/{addressId}
+     * @param userId
+     * @param addressId
+     * @return
+     */
     @GetMapping(
             path = "/{userId}/addresses/{addressId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, "application/hal+json" }
@@ -157,6 +212,13 @@ public class UserController {
 
         return new EntityModel<>(addressesRestModel);
     }
+
+    /**
+     * [GET] Verify Email
+     * [Path] http://localhost:8080/app/users/email-verification
+     * @param token
+     * @return
+     */
     @GetMapping(
             path = "/email-verification",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
@@ -176,8 +238,12 @@ public class UserController {
         return returnValue;
     }
 
-    /*
-     * http://localhost:8080/app/users/password-reset
+    /**
+     * [POST] Request Password Reset
+     * [Path] http://localhost:8080/app/users/password-reset-request
+     * No Role Needed
+     * @param passwordResetRequestModel
+     * @return
      */
     @PostMapping(
             path = "/password-reset-request",
@@ -197,6 +263,14 @@ public class UserController {
         }
         return returnValue;
     }
+
+    /**
+     * [POST] Password Reset
+     * [Path] http://localhost:8080/app/users/password-reset
+     * No Role Needed
+     * @param passwordResetModel
+     * @return
+     */
     @PostMapping(
             path = "/password-reset",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
@@ -216,4 +290,35 @@ public class UserController {
         }
         return returnValue;
     }
+
+    /**
+     * [POST] Create Invoice With Order(s)
+     * [Path] = http://localhost:8080/app/users/{userId}/order
+     * @param userId
+     * @param ordersRequestModel
+     * @return
+     */
+    @PostMapping(
+            path = { "/{userId}/order", "/{userId}/order/"}
+    )
+    public InvoiceRest createOrder(@PathVariable String userId, @RequestBody OrdersRequestModel ordersRequestModel) {
+        InvoiceRest returnValue = new InvoiceRest();
+
+        InvoiceDTO invoiceDTO = new InvoiceDTO();
+        List<OrderRequestModel> orders = ordersRequestModel.getOrders();
+
+        List<OrderDTO> listOrders = new ArrayList<>();
+        for(OrderRequestModel order : orders) {
+            listOrders.add(modelMapper.map(order,OrderDTO.class));
+        }
+
+        invoiceDTO.setUserId(userId);
+        invoiceDTO.setOrders(listOrders);
+        invoiceDTO.setAddressId(ordersRequestModel.getAddressId());
+
+        InvoiceDTO savedInvoice = invoiceService.createInvoice(invoiceDTO);
+        returnValue = modelMapper.map(savedInvoice,InvoiceRest.class);
+        return returnValue;
+    }
+
 }

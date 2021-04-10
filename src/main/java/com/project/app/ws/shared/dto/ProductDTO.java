@@ -10,12 +10,12 @@ public class ProductDTO implements Serializable {
     private static final long serialVersionId = 1L;
 
     private long id;
-    private String productId;
     private String name;
     private String description;
     private String pictureUrl;
     private Double price;
     private boolean available;
+    private boolean promoted;
     private CategoryEntity categoryEntity;
     private long categoryId;
     private Collection<ProductDTO> items;
@@ -26,12 +26,6 @@ public class ProductDTO implements Serializable {
     }
     public void setId(long id) {
         this.id = id;
-    }
-    public String getProductId() {
-        return productId;
-    }
-    public void setProductId(String productId) {
-        this.productId = productId;
     }
     public String getName() {
         return name;
@@ -62,6 +56,12 @@ public class ProductDTO implements Serializable {
     }
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+    public boolean isPromoted() {
+        return promoted;
+    }
+    public void setPromoted(boolean promoted) {
+        this.promoted = promoted;
     }
     public CategoryEntity getCategoryEntity() {
         return categoryEntity;

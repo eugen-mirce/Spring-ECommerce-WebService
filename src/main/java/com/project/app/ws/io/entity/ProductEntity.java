@@ -1,12 +1,7 @@
 package com.project.app.ws.io.entity;
 
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 @Entity(name="products")
@@ -16,9 +11,6 @@ public class ProductEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Column(nullable = false, length = 30)
-    private String productId;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -34,6 +26,9 @@ public class ProductEntity implements Serializable {
 
     @Column(nullable = false)
     private boolean available;
+
+    @Column(nullable = false)
+    private boolean promoted;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="category_id", referencedColumnName="id", unique = false)
@@ -51,12 +46,6 @@ public class ProductEntity implements Serializable {
     }
     public void setId(long id) {
         this.id = id;
-    }
-    public String getProductId() {
-        return productId;
-    }
-    public void setProductId(String productId) {
-        this.productId = productId;
     }
     public String getName() {
         return name;
@@ -81,6 +70,12 @@ public class ProductEntity implements Serializable {
     }
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+    public boolean isPromoted() {
+        return promoted;
+    }
+    public void setPromoted(boolean promoted) {
+        this.promoted = promoted;
     }
     public CategoryEntity getCategoryEntity() {
         return categoryEntity;

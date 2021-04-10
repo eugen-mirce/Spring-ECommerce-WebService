@@ -1,16 +1,9 @@
 package com.project.app.ws.ui.model.request;
 
 public class OrderRequestModel {
-    private String userId;
     private String productId;
     private int quantity;
 
-    public String getUserId() {
-        return userId;
-    }
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
     public String getProductId() {
         return productId;
     }

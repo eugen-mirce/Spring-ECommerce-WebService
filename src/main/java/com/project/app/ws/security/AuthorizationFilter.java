@@ -38,6 +38,13 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         }
         UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        res.addHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+        res.setHeader("Access-Control-Allow-Headers",
+                "content-type, x-gwt-module-base, x-gwt-permutation, clientid, longpush");
+
         chain.doFilter(req,res);
     }
 

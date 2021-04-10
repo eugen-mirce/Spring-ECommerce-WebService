@@ -9,6 +9,7 @@ public class ProductRequestModel {
     private String description;
     private String pictureUrl;
     private Double price;
+    private boolean promoted;
     private long categoryId;
     private List<ItemIds> items;
 
@@ -35,6 +36,12 @@ public class ProductRequestModel {
     }
     public void setPrice(Double price) {
         this.price = price;
+    }
+    public boolean isPromoted() {
+        return promoted;
+    }
+    public void setPromoted(boolean promoted) {
+        this.promoted = promoted;
     }
     public long getCategoryId() {
         return categoryId;
