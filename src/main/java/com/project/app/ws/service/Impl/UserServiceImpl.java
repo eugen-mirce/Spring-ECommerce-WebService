@@ -15,6 +15,7 @@ import com.project.app.ws.io.repositories.UserRepository;
 import com.project.app.ws.io.entity.UserEntity;
 import com.project.app.ws.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -97,8 +98,12 @@ public class UserServiceImpl implements UserService {
         UserDto returnValue = new UserDto();
         UserEntity userEntity = userRepository.findByEmail(email);
         if(userEntity == null) throw new UsernameNotFoundException(email);
-
+        Collection<String> roles = new HashSet<>();
+        for(RoleEntity roleEntity : userEntity.getRoles()) {
+            roles.add(roleEntity.getName());
+        }
         BeanUtils.copyProperties(userEntity,returnValue);
+        returnValue.setRoles(roles);
         return returnValue;
     }
 

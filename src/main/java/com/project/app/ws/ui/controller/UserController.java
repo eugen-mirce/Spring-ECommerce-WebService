@@ -35,7 +35,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("users")        //http://localhost:8080/users
 public class UserController {
-    private boolean skipVerification = false;
+    private boolean skipVerification = true;
 
     @Autowired
     UserService userService;

@@ -60,5 +60,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         UserDto userDto = userService.getUser(userName);
         res.addHeader("UserID", userDto.getUserId());
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
+        res.addHeader("IsAdmin", userDto.getRoles().contains("ROLE_ADMIN") ? "true": "false");
     }
 }
