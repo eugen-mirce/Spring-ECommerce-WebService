@@ -17,7 +17,7 @@ public class CategoryEntity implements Serializable {
     private String name;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "categoryEntity", cascade = CascadeType.ALL)
-    private Set<ProductEntity> products = new HashSet<ProductEntity>();
+    private Set<ProductEntity> products = new HashSet<>();
 
     public long getId() {
         return id;

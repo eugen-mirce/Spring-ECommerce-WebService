@@ -1,6 +1,7 @@
 package com.project.app.ws.io.entity;
 
 import javax.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 
 @Entity(name="addresses")

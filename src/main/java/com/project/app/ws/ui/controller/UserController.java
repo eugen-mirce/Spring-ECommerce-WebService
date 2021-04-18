@@ -1,7 +1,6 @@
 package com.project.app.ws.ui.controller;
 
 import com.project.app.ws.service.InvoiceService;
-import com.project.app.ws.service.OrderService;
 import com.project.app.ws.shared.Roles;
 import com.project.app.ws.shared.dto.AddressDTO;
 import com.project.app.ws.shared.dto.InvoiceDTO;
@@ -15,11 +14,7 @@ import com.project.app.ws.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("users")        //http://localhost:8080/users
@@ -42,9 +36,6 @@ public class UserController {
 
     @Autowired
     AddressService addressService;
-
-    @Autowired
-    OrderService orderService;
 
     @Autowired
     ModelMapper modelMapper;
@@ -64,7 +55,8 @@ public class UserController {
             path = "/{userId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
             )
-    public UserRest getUser(@PathVariable String userId) {
+    public UserRest getUser(@PathVariable String userId)
+    {
 
         UserDto userDto = userService.getUserByUserId(userId);
 
@@ -83,16 +75,22 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
             )
-    public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws UserServiceException {
+    public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails)
+            throws UserServiceException
+    {
 
         if(userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+        if(userDetails.getLastName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+        if(userDetails.getEmail().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+        if(userDetails.getPassword().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
         UserDto userDto = modelMapper.map(userDetails,UserDto.class);
         userDto.setRoles(new HashSet<>(Arrays.asList(Roles.ROLE_USER.name())));
         UserDto createdUser = userService.createUser(userDto,skipVerification);
 
-        return modelMapper.map(createdUser,UserRest.class);
+        if(createdUser.getAddresses() == null) createdUser.setAddresses(new ArrayList<>());
 
+        return modelMapper.map(createdUser,UserRest.class);
     }
 
     /**
@@ -108,7 +106,9 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
             )
-    public UserRest updateUser(@PathVariable String userId, @RequestBody UserDetailsRequestModel userDetails) {
+    public UserRest updateUser(@PathVariable String userId,
+                               @RequestBody UserDetailsRequestModel userDetails)
+    {
 
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
 
@@ -128,7 +128,8 @@ public class UserController {
             path = "/{userId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
             )
-    public OperationStatusModel deleteUser(@PathVariable String userId) {
+    public OperationStatusModel deleteUser(@PathVariable String userId)
+    {
         OperationStatusModel returnValue = new OperationStatusModel();
         returnValue.setOperationName(RequestOperationName.DELETE.name());
         userService.deleteUser(userId);
@@ -146,7 +147,9 @@ public class UserController {
      * @return
      */
     @GetMapping(produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public List<UserRest> getUsers(@RequestParam(value="page", defaultValue = "1") int page, @RequestParam(value = "limit", defaultValue = "10") int limit) {
+    public List<UserRest> getUsers(@RequestParam(value="page", defaultValue = "1") int page,
+                                   @RequestParam(value = "limit", defaultValue = "10") int limit)
+    {
         List<UserRest> returnValue = new ArrayList<>();
         List<UserDto> users = userService.getUsers(page,limit);
         for(UserDto userDto : users) {
@@ -167,23 +170,16 @@ public class UserController {
             path = "/{userId}/addresses",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, "application/hal+json" }
     )
-    public CollectionModel<AddressesRest> getUserAddresses(@PathVariable String userId) {
+    public List<AddressesRest> getUserAddresses(@PathVariable String userId)
+    {
         List<AddressesRest> addressesListRestModel = new ArrayList<>();
         List<AddressDTO> addressDTO = addressService.getAddresses(userId);
 
         if(addressDTO != null && !addressDTO.isEmpty()) {
             Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
             addressesListRestModel = modelMapper.map(addressDTO,listType);
-
-            for(AddressesRest addressesRest: addressesListRestModel) {
-                Link addressLink = linkTo(methodOn(UserController.class).getUserAddress(userId,addressesRest.getAddressId())).withSelfRel();
-                Link userLink = linkTo(methodOn(UserController.class).getUser(userId)).withRel("user");
-
-                addressesRest.add(addressLink);
-                addressesRest.add(userLink);
-            }
         }
-        return new CollectionModel<>(addressesListRestModel);
+        return addressesListRestModel;
     }
 
     /**
@@ -197,98 +193,30 @@ public class UserController {
             path = "/{userId}/addresses/{addressId}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE, "application/hal+json" }
     )
-    public EntityModel<AddressesRest> getUserAddress(@PathVariable String userId,
-                                                    @PathVariable String addressId) {
-        AddressDTO addressDTO = addressService.getAddress(addressId);
-        AddressesRest addressesRestModel = modelMapper.map(addressDTO,AddressesRest.class);
-
-        Link addressLink = linkTo(methodOn(UserController.class).getUserAddress(userId,addressId)).withSelfRel();
-        Link userLink = linkTo(methodOn(UserController.class).getUser(userId)).withRel("user");
-        Link addressesLink = linkTo(methodOn(UserController.class).getUserAddresses(userId)).withRel("addresses");
-
-        addressesRestModel.add(addressLink);
-        addressesRestModel.add(userLink);
-        addressesRestModel.add(addressesLink);
-
-        return new EntityModel<>(addressesRestModel);
+    public AddressesRest getUserAddress(@PathVariable String userId,
+                                        @PathVariable String addressId)
+    {
+        AddressDTO addressDTO = addressService.getAddress(userId,addressId);
+        return modelMapper.map(addressDTO,AddressesRest.class);
     }
 
     /**
-     * [GET] Verify Email
-     * [Path] http://localhost:8080/app/users/email-verification
-     * @param token
-     * @return
-     */
-    @GetMapping(
-            path = "/email-verification",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
-    )
-    public OperationStatusModel verifyEmailToken(@RequestParam(value = "token") String token) {
-        OperationStatusModel returnValue = new OperationStatusModel();
-        returnValue.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
-
-        boolean isVerified = userService.verifyEmailToken(token);
-
-        if(isVerified) {
-            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
-        } else {
-            returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
-        }
-
-        return returnValue;
-    }
-
-    /**
-     * [POST] Request Password Reset
-     * [Path] http://localhost:8080/app/users/password-reset-request
-     * No Role Needed
-     * @param passwordResetRequestModel
+     * [POST] Add Address To Specific User
+     * [Path] = http://localhost:8080/app/users/{userId}/addresses
+     * @param userId
+     * @param addressRequestModel
      * @return
      */
     @PostMapping(
-            path = "/password-reset-request",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+            path = { "/{userId}/addresses", "/{userId}/addresses/" }
     )
-    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel passwordResetRequestModel) {
-        OperationStatusModel returnValue = new OperationStatusModel();
+    public AddressesRest addAddress(@PathVariable String userId,
+                                    @RequestBody AddressRequestModel addressRequestModel
+    ) {
+        AddressDTO addressDTO = modelMapper.map(addressRequestModel,AddressDTO.class);
 
-        boolean operationResult = userService.requestPasswordReset(passwordResetRequestModel.getEmail());
-
-        returnValue.setOperationName(RequestOperationName.REQUEST_PASSWORD_RESET.name());
-        returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
-
-        if(operationResult == true) {
-            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
-        }
-        return returnValue;
-    }
-
-    /**
-     * [POST] Password Reset
-     * [Path] http://localhost:8080/app/users/password-reset
-     * No Role Needed
-     * @param passwordResetModel
-     * @return
-     */
-    @PostMapping(
-            path = "/password-reset",
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
-    )
-    public OperationStatusModel resetPassword(@RequestBody PasswordResetModel passwordResetModel) {
-        OperationStatusModel returnValue = new OperationStatusModel();
-
-        boolean operationResult = userService.resetPassword(
-                passwordResetModel.getToken(),
-                passwordResetModel.getPassword());
-
-        returnValue.setOperationName(RequestOperationName.PASSWORD_RESET.name());
-        returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
-
-        if(operationResult == true) {
-            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
-        }
-        return returnValue;
+        AddressDTO address = addressService.addAddress(userId,addressDTO);
+        return modelMapper.map(address,AddressesRest.class);
     }
 
     /**
@@ -321,4 +249,124 @@ public class UserController {
         return returnValue;
     }
 
+    /**
+     * [GET] Get All Invoices For User
+     * [Path] = http://localhost:8080/app/users/{userId}/invoices
+     * @param userId
+     * @param page
+     * @param limit
+     * @return
+     */
+    @GetMapping(
+            path = { "/{userId}/invoices", "/{userId}/invoices/" },
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public List<InvoiceRest> getInvoices(
+            @PathVariable String userId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "limit", defaultValue = "10") int limit)
+    {
+        List<InvoiceDTO> invoices = invoiceService.getUserInvoices(userId,page,limit);
+        return modelMapper.map(invoices,new TypeToken<List<InvoiceRest>>() {}.getType());
+    }
+
+    /**
+     * [GET] Get Invoice For User
+     * [Path] = http://localhost:8080/app/users/{userId}/invoices
+     * @param userId
+     * @param invoiceId
+     * @return
+     */
+    @GetMapping(
+            path = { "/{userId}/invoices/{invoiceId}", "/{userId}/invoices/{invoiceId}/" },
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public InvoiceRest getInvoice(@PathVariable String userId,
+                                  @PathVariable long invoiceId)
+    {
+        InvoiceDTO invoices = invoiceService.getInvoice(userId,invoiceId);
+        return modelMapper.map(invoices,InvoiceRest.class);
+    }
+
+
+    /**
+     * [GET] Verify Email
+     * [Path] http://localhost:8080/app/users/email-verification
+     * @param token
+     * @return
+     */
+    @GetMapping(
+            path = "/email-verification",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public OperationStatusModel verifyEmailToken(@RequestParam(value = "token") String token)
+    {
+        OperationStatusModel returnValue = new OperationStatusModel();
+        returnValue.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
+
+        boolean isVerified = userService.verifyEmailToken(token);
+
+        if(isVerified) {
+            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        } else {
+            returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+        }
+
+        return returnValue;
+    }
+
+    /**
+     * [POST] Request Password Reset
+     * [Path] http://localhost:8080/app/users/password-reset-request
+     * No Role Needed
+     * @param passwordResetRequestModel
+     * @return
+     */
+    @PostMapping(
+            path = "/password-reset-request",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public OperationStatusModel requestReset(@RequestBody PasswordResetRequestModel passwordResetRequestModel)
+    {
+        OperationStatusModel returnValue = new OperationStatusModel();
+
+        boolean operationResult = userService.requestPasswordReset(passwordResetRequestModel.getEmail());
+
+        returnValue.setOperationName(RequestOperationName.REQUEST_PASSWORD_RESET.name());
+        returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+
+        if(operationResult == true) {
+            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        }
+        return returnValue;
+    }
+
+    /**
+     * [POST] Password Reset
+     * [Path] http://localhost:8080/app/users/password-reset
+     * No Role Needed
+     * @param passwordResetModel
+     * @return
+     */
+    @PostMapping(
+            path = "/password-reset",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public OperationStatusModel resetPassword(@RequestBody PasswordResetModel passwordResetModel)
+    {
+        OperationStatusModel returnValue = new OperationStatusModel();
+
+        boolean operationResult = userService.resetPassword(
+                passwordResetModel.getToken(),
+                passwordResetModel.getPassword());
+
+        returnValue.setOperationName(RequestOperationName.PASSWORD_RESET.name());
+        returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+
+        if(operationResult == true) {
+            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        }
+        return returnValue;
+    }
 }

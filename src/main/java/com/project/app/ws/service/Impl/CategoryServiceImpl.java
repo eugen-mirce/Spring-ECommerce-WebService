@@ -7,6 +7,7 @@ import com.project.app.ws.io.entity.UserEntity;
 import com.project.app.ws.io.repositories.CategoryRepository;
 import com.project.app.ws.service.CategoryService;
 import com.project.app.ws.shared.dto.CategoryDTO;
+import com.project.app.ws.ui.model.response.ErrorMessages;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
         if(categoryRepository.findByName(categoryDTO.getName()) != null)
-            throw new CategoryServiceException("Category Already Exists");
+            throw new CategoryServiceException(ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
 
         CategoryEntity categoryEntity = modelMapper.map(categoryDTO,CategoryEntity.class);
 
@@ -49,7 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDTO updateCategory(long categoryId, CategoryDTO categoryDTO) {
         CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
-                .orElseThrow(()-> new CategoryServiceException("Category Not Found Exception"));
+                .orElseThrow(()-> new CategoryServiceException("Category With Given id Not Found"));
 
         categoryEntity.setName(categoryDTO.getName());
         CategoryEntity updatedCategory = categoryRepository.save(categoryEntity);
@@ -62,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteUser(long categoryId) {
 
         CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
-                .orElseThrow(()-> new CategoryServiceException("Category Not Found Exception"));
+                .orElseThrow(()-> new CategoryServiceException("Category With Given id Not Found"));
 
         categoryRepository.delete(categoryEntity);
     }

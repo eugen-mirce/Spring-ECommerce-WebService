@@ -1,7 +1,7 @@
 package com.project.app.ws.service.Impl;
 
 import com.project.app.ws.exceptions.AddressServiceException;
-import com.project.app.ws.exceptions.InvoiceNotFoundException;
+import com.project.app.ws.exceptions.InvoiceServiceException;
 import com.project.app.ws.exceptions.UserServiceException;
 import com.project.app.ws.io.entity.AddressEntity;
 import com.project.app.ws.io.entity.InvoiceEntity;
@@ -22,7 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -92,9 +91,55 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public List<InvoiceDTO> getUserInvoices(String userId, int page, int limit) {
+        UserEntity userEntity = userRepository.findByUserId(userId);
+        if(userEntity == null) throw new UserServiceException("User Not Found Exception");
+
+        if(page > 0) page--;
+        Pageable pageableRequest = PageRequest.of(page,limit);
+        Page<InvoiceEntity> invoicesPage = invoiceRepository.findAllByUserDetails(userEntity,pageableRequest);
+
+        List<InvoiceEntity> invoices = invoicesPage.getContent();
+        return modelMapper.map(invoices,new TypeToken<List<InvoiceDTO>>() {}.getType());
+    }
+
+    @Override
+    public InvoiceDTO getInvoice(String userId, long invoiceId) {
+        UserEntity userEntity = userRepository.findByUserId(userId);
+        if(userEntity == null) throw new UserServiceException("User Not Found");
+
+        InvoiceEntity invoiceEntity = invoiceRepository.findByIdAndUserDetails(invoiceId,userEntity);
+        if(invoiceEntity == null) {
+            invoiceRepository.findById(invoiceId)
+                    .orElseThrow(()-> new InvoiceServiceException("Invoice Not Found"));
+            throw new InvoiceServiceException("This invoice doesn't belong to this user");
+        }
+
+        return modelMapper.map(invoiceEntity,InvoiceDTO.class);
+    }
+
+    @Override
+    public InvoiceDTO updateInvoice(long invoiceId, InvoiceDTO invoiceDTO) {
+        InvoiceEntity invoiceEntity = invoiceRepository.findById(invoiceId)
+                .orElseThrow(()-> new InvoiceServiceException("Invoice Not Found Exception"));
+
+        invoiceEntity.setShipped(invoiceDTO.isShipped());
+        InvoiceEntity updatedInvoice = invoiceRepository.save(invoiceEntity);
+        return modelMapper.map(invoiceEntity,InvoiceDTO.class);
+    }
+
+    @Override
+    public void deleteInvoice(long invoiceId) {
+        InvoiceEntity invoiceEntity = invoiceRepository.findById(invoiceId)
+                .orElseThrow(()-> new InvoiceServiceException("Invoice Not Found Exception"));
+
+        invoiceRepository.delete(invoiceEntity);
+    }
+
+    @Override
     public InvoiceDTO getInvoice(long invoiceId) {
         InvoiceEntity invoiceEntity = invoiceRepository.findById(invoiceId)
-                .orElseThrow(()-> new InvoiceNotFoundException("Invoice Not Found Exception"));
+                .orElseThrow(()-> new InvoiceServiceException("Invoice Not Found Exception"));
 
         return modelMapper.map(invoiceEntity,InvoiceDTO.class);
     }

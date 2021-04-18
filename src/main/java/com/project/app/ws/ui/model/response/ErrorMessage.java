@@ -3,25 +3,30 @@ package com.project.app.ws.ui.model.response;
 import java.util.Date;
 
 public class ErrorMessage {
-    private Date timestamp;
+    private int status;
+    private Date date;
     private String message;
 
-    public ErrorMessage(Date timestamp, String message) {
-        this.timestamp = timestamp;
+    public ErrorMessage(int status, Date date, String message) {
+        this.status = status;
+        this.date = date;
         this.message = message;
     }
-    public Date getTimestamp() {
-        return timestamp;
+    public int getStatus() {
+        return status;
     }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setStatus(int status) {
+        this.status = status;
     }
-
+    public Date getDate() {
+        return date;
+    }
+    public void setDate(Date timestamp) {
+        this.date = timestamp;
+    }
     public String getMessage() {
         return message;
     }
-
     public void setMessage(String message) {
         this.message = message;
     }

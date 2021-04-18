@@ -21,7 +21,7 @@ public class ProductEntity implements Serializable {
     @Column(nullable = false)
     private Double price;
 
-    @Column(nullable = true, length = 200)
+    @Column(length = 200)
     private String pictureUrl;
 
     @Column(nullable = false)
@@ -31,7 +31,7 @@ public class ProductEntity implements Serializable {
     private boolean promoted;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name="category_id", referencedColumnName="id", unique = false)
+    @JoinColumn(name="category_id", referencedColumnName="id")
     private CategoryEntity categoryEntity;
 
     @ManyToMany(cascade = {CascadeType.MERGE})

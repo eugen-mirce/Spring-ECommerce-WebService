@@ -42,7 +42,8 @@ public class CategoryController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
     )
-    public CategoryRest createCategory(@RequestBody CategoryRequestModel categoryRequestModel) {
+    public CategoryRest createCategory(@RequestBody CategoryRequestModel categoryRequestModel)
+    {
 
         CategoryDTO categoryDTO = modelMapper.map(categoryRequestModel,CategoryDTO.class);
         CategoryDTO savedCategory = categoryService.createCategory(categoryDTO);
@@ -59,7 +60,8 @@ public class CategoryController {
     @GetMapping(
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
     )
-    public List<CategoryRest> getCategories() {
+    public List<CategoryRest> getCategories()
+    {
         List<CategoryRest> returnValue = new ArrayList<>();
         List<CategoryDTO> categories = categoryService.getCategories();
 
@@ -111,7 +113,9 @@ public class CategoryController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
     )
-    public CategoryRest updateCategory(@PathVariable long categoryId, @RequestBody CategoryRequestModel categoryRequestModel
+    public CategoryRest updateCategory(
+            @PathVariable long categoryId,
+            @RequestBody CategoryRequestModel categoryRequestModel
     ) {
         CategoryDTO categoryDTO = modelMapper.map(categoryRequestModel,CategoryDTO.class);
         CategoryDTO savedChanges = categoryService.updateCategory(categoryId,categoryDTO);
@@ -130,7 +134,8 @@ public class CategoryController {
             path = { "/{categoryId}", "/{categoryId}/" },
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
     )
-    public OperationStatusModel deleteCategory(@PathVariable long categoryId) {
+    public OperationStatusModel deleteCategory(@PathVariable long categoryId)
+    {
         OperationStatusModel returnValue = new OperationStatusModel();
         returnValue.setOperationName(RequestOperationName.DELETE.name());
         categoryService.deleteUser(categoryId);
